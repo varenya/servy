@@ -1,5 +1,5 @@
 defmodule Servy.Conv do
-  defstruct method: "", path: "", resp_body: "", status: nil
+  defstruct method: "", path: "", resp_body: "", status: nil, params: %{}, headers: %{}
 
   @status_message_map %{
     200 => "OK",

@@ -31,6 +31,14 @@ defmodule Servy.Handler do
     %Conv{conv | resp_body: "Deleting a bear #{id} is forbidden", status: 403}
   end
 
+  def route(%Conv{method: "POST", path: "/bears/new", params: params, headers: _headers} = conv) do
+    %Conv{
+      conv
+      | resp_body: "Created a new bear of type #{params["type"]} with name #{params["name"]}",
+        status: 200
+    }
+  end
+
   def route(%Conv{method: "GET", path: "/pages/" <> filename} = conv) do
     get_page(filename <> ".html")
     |> File.read()
@@ -157,3 +165,43 @@ Accept: */*
 """
 
 IO.puts(Servy.Handler.handle(request))
+
+request = """
+GET /pages/faq HTTP/1.1
+Host: example.com
+User-Agent: ExampleBrowser/1.0
+Accept: */*
+
+"""
+
+IO.puts(Servy.Handler.handle(request))
+
+request = """
+POST /bears/new HTTP/1.1
+Host: example.com
+User-Agent: ExampleBrowser/1.0
+Accept: */*
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 21
+
+name=Baloo&type=Brown
+"""
+
+response = Servy.Handler.handle(request)
+
+IO.puts(response)
+
+request = """
+POST /bears/new HTTP/1.1
+Host: example.com
+User-Agent: ExampleBrowser/1.0
+Accept: */*
+Content-Type: multipart/form-data
+Content-Length: 21
+
+name=Baloo&type=Brown
+"""
+
+response = Servy.Handler.handle(request)
+
+IO.puts(response)
