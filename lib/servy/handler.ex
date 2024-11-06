@@ -56,6 +56,12 @@ defmodule Servy.Handler do
     BearController.create(conv, params)
   end
 
+  def route(%Conv{method: "GET", path: "/pages/faq"} = conv) do
+    get_page("faq.md")
+    |> File.read()
+    |> handle_file(conv)
+  end
+
   def route(%Conv{method: "GET", path: "/pages/" <> filename} = conv) do
     get_page(filename <> ".html")
     |> File.read()
@@ -89,3 +95,27 @@ defmodule Servy.Handler do
     """
   end
 end
+
+request = """
+GET /pages/faq HTTP/1.1\r
+Host: example.com\r
+User-Agent: ExampleBrowser/1.0\r
+Accept: */*\r
+\r
+"""
+
+resp = Servy.Handler.handle(request)
+
+IO.inspect(resp)
+
+request = """
+GET /pages/about HTTP/1.1\r
+Host: example.com\r
+User-Agent: ExampleBrowser/1.0\r
+Accept: */*\r
+\r
+"""
+
+resp = Servy.Handler.handle(request)
+
+IO.inspect(resp)

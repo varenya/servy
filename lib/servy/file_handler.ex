@@ -5,7 +5,8 @@ defmodule Servy.FileHandler do
   end
 
   def handle_file({:ok, content}, conv) do
-    %{conv | status: 200, resp_body: content}
+    converted_html = Earmark.as_html!(content)
+    %{conv | status: 200, resp_body: converted_html}
   end
 
   def handle_file({:error, :enoent}, conv) do
