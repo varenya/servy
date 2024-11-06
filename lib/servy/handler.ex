@@ -7,7 +7,18 @@ defmodule Servy.Handler do
   alias Servy.Conv
 
   def handle(request) do
-    request |> parse() |> rewrite_path() |> route() |> track() |> format_response()
+    request
+    |> parse()
+    |> rewrite_path()
+    |> route()
+    |> track()
+    |> put_content_length()
+    |> format_response()
+  end
+
+  def put_content_length(conv) do
+    resp_headers = Map.put(conv.resp_headers, "Content-Length", String.length(conv.resp_body))
+    %{conv | resp_headers: resp_headers}
   end
 
   def route(%Conv{method: "GET", path: "/wildlife"} = conv) do
@@ -20,6 +31,10 @@ defmodule Servy.Handler do
 
   def route(%Conv{method: "GET", path: "/api/bears"} = conv) do
     Servy.Api.BearController.index(conv)
+  end
+
+  def route(%Conv{method: "POST", path: "/api/bears", params: params} = conv) do
+    Servy.Api.BearController.create(conv, params)
   end
 
   def route(%Conv{method: "GET", path: "/bears/new"} = conv) do
@@ -57,11 +72,18 @@ defmodule Servy.Handler do
     %Conv{conv | resp_body: "No #{path} here!", status: 404}
   end
 
+  def format_response_headers(%Conv{resp_headers: resp_headers}) do
+    resp_headers
+    |> Enum.map(fn {k, v} -> "#{k}: #{v}\r" end)
+    |> Enum.sort()
+    |> Enum.reverse()
+    |> Enum.join("\n")
+  end
+
   def format_response(%Conv{} = conv) do
     """
     HTTP/1.1 #{Conv.full_status(conv)}\r
-    Content-Type: #{conv.resp_content_type}\r
-    Content-Length: #{String.length(conv.resp_body)}\r
+    #{format_response_headers(conv)}
     \r
     #{conv.resp_body}
     """

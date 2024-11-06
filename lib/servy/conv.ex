@@ -5,7 +5,7 @@ defmodule Servy.Conv do
             status: nil,
             params: %{},
             headers: %{},
-            resp_content_type: "text/html"
+            resp_headers: %{"Content-Type" => "text/html"}
 
   @status_message_map %{
     200 => "OK",
@@ -18,6 +18,15 @@ defmodule Servy.Conv do
 
   def full_status(conv) do
     "#{conv.status} #{status_reason(conv.status)}"
+  end
+
+  def set_content_type(conv, content_type) do
+    resp_headers = conv.resp_headers |> Map.put("Content-Type", content_type)
+    %{conv | resp_headers: resp_headers}
+  end
+
+  def content_type(conv) do
+    conv.resp_headers["Content-Type"]
   end
 
   defp status_reason(code) do
