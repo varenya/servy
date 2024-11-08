@@ -21,6 +21,15 @@ defmodule Servy.Handler do
     %{conv | resp_headers: resp_headers}
   end
 
+  def route(%Conv{method: "GET", path: "/kaboom"}) do
+    raise "Kaboom!"
+  end
+
+  def route(%Conv{method: "GET", path: "/hibernate/" <> time} = conv) do
+    time |> String.to_integer() |> :timer.sleep()
+    %Conv{conv | resp_body: "Awake!", status: 200}
+  end
+
   def route(%Conv{method: "GET", path: "/wildlife"} = conv) do
     %Conv{conv | resp_body: "Bears, Lions, Tigers", status: 200}
   end
