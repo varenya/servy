@@ -1,0 +1,12 @@
+<h1>All The Snapshots!</h1>
+<ul>
+  <%= for snapshot <- snapshots do  %>
+    <li><%= snapshot %></li>
+  <% end %>
+</ul>
+
+<p>Big foot location</p>
+<div>
+  Long: <strong><%= bigfoot.lng %></strong> 
+  Lat: <strong><%= bigfoot.lat %></strong> 
+</div>

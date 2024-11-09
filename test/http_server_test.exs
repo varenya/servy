@@ -21,22 +21,41 @@ defmodule HttpServerTest do
   end
 
   test "accepts a request on a socket and sends back a response" do
-    parent = self()
     max_concurrent_requests = 5
 
-    for _ <- 1..max_concurrent_requests do
-      spawn(fn ->
-        {:ok, response} = HTTPoison.get("#{@url}/wildthings")
-        send(parent, {:ok, response})
-      end)
-    end
-
-    for _ <- 1..max_concurrent_requests do
-      receive do
-        {:ok, %HTTPoison.Response{status_code: status, body: body}} ->
-          assert status == 200
-          assert body == "Bears, Lions, Tigers"
+    tasks =
+      for _ <- 1..max_concurrent_requests do
+        Task.async(fn ->
+          HTTPoison.get("#{@url}/wildthings")
+        end)
       end
+
+    for task <- tasks do
+      {:ok, %HTTPoison.Response{status_code: status, body: body}} = Task.await(task)
+      assert status == 200
+      assert body == "Bears, Lions, Tigers"
+    end
+  end
+
+  test "accepts a request from multiple urls on a socket and sends back a response" do
+    urls = [
+      "http://localhost:4000/wildthings",
+      "http://localhost:4000/bears",
+      "http://localhost:4000/bears/1",
+      "http://localhost:4000/wildlife",
+      "http://localhost:4000/api/bears"
+    ]
+
+    tasks =
+      for url <- urls do
+        Task.async(fn ->
+          HTTPoison.get(url)
+        end)
+      end
+
+    for task <- tasks do
+      {:ok, %HTTPoison.Response{status_code: status, body: body}} = Task.await(task)
+      assert status == 200
     end
   end
 end

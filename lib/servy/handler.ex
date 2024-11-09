@@ -3,6 +3,7 @@ defmodule Servy.Handler do
   import Servy.Parser, only: [parse: 1]
   import Servy.FileHandler, only: [get_page: 1, handle_file: 2]
 
+  alias Servy.BearView
   alias Servy.BearController
   alias Servy.Conv
   alias Servy.VideoCam
@@ -31,12 +32,12 @@ defmodule Servy.Handler do
 
     snapshots =
       ["cam-1", "cam-2", "cam-3"]
-      |> Enum.map(&Task.async(Servy.VideoCam, :get_snapshot, [&1]))
+      |> Enum.map(&Task.async(VideoCam, :get_snapshot, [&1]))
       |> Enum.map(&Task.await/1)
 
-    where_is_bigfoot = Task.await(task)
+    bigfoot = Task.await(task)
 
-    %{conv | status: 200, resp_body: inspect({snapshots, where_is_bigfoot})}
+    %{conv | status: 200, resp_body: BearView.show_snapshots(snapshots, bigfoot)}
   end
 
   def route(%Conv{method: "GET", path: "/hibernate/" <> time} = conv) do
@@ -118,27 +119,3 @@ defmodule Servy.Handler do
     """
   end
 end
-
-request = """
-GET /pages/faq HTTP/1.1\r
-Host: example.com\r
-User-Agent: ExampleBrowser/1.0\r
-Accept: */*\r
-\r
-"""
-
-resp = Servy.Handler.handle(request)
-
-IO.inspect(resp)
-
-request = """
-GET /pages/about HTTP/1.1\r
-Host: example.com\r
-User-Agent: ExampleBrowser/1.0\r
-Accept: */*\r
-\r
-"""
-
-resp = Servy.Handler.handle(request)
-
-IO.inspect(resp)
