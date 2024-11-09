@@ -19,4 +19,24 @@ defmodule HttpServerTest do
     assert status == 200
     assert length(bears) == 10
   end
+
+  test "accepts a request on a socket and sends back a response" do
+    parent = self()
+    max_concurrent_requests = 5
+
+    for _ <- 1..max_concurrent_requests do
+      spawn(fn ->
+        {:ok, response} = HTTPoison.get("#{@url}/wildthings")
+        send(parent, {:ok, response})
+      end)
+    end
+
+    for _ <- 1..max_concurrent_requests do
+      receive do
+        {:ok, %HTTPoison.Response{status_code: status, body: body}} ->
+          assert status == 200
+          assert body == "Bears, Lions, Tigers"
+      end
+    end
+  end
 end
