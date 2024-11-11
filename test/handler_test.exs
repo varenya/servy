@@ -137,7 +137,7 @@ defmodule HandlerTest do
     expected_response = """
     HTTP/1.1 200 OK\r
     Content-Type: text/html\r
-    Content-Length: 100\r
+    Content-Length: 105\r
     \r
     <h1>Clark's Wildthings Refuge</h1>
 
