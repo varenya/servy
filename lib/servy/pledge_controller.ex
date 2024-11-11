@@ -1,5 +1,10 @@
 defmodule Servy.PledgeController do
   import Servy.PledgeServer, only: [create_pledge: 2, recent_pledges: 0]
+  alias Servy.BearView
+
+  def new(conv) do
+    BearView.render(conv, BearView.new_pledge())
+  end
 
   def create(conv, %{"name" => name, "amount" => amount}) do
     # Sends the pledge to the external service and caches it
@@ -11,7 +16,8 @@ defmodule Servy.PledgeController do
   def index(conv) do
     # Gets the recent pledges from the cache
     pledges = recent_pledges()
+    content = BearView.recent_pledges(pledges)
 
-    %{conv | status: 200, resp_body: inspect(pledges)}
+    BearView.render(conv, content)
   end
 end

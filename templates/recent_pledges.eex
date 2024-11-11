@@ -1,0 +1,5 @@
+<ul>
+  <%= for {name, amount} <- pledges do %>
+      <li><%= name %> pledged <%= amount %></li>
+  <% end %>
+</ul>

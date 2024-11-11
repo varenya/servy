@@ -1,0 +1,5 @@
+<form action="/pledges" method="POST">
+  <input type="text" name="name" placeholder="Person Name" />
+  <input type="text" name="amount" placeholder="Amount" />
+  <button type="submit">Add pledge</button>
+</form>

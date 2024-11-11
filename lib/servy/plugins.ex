@@ -5,7 +5,11 @@ defmodule Servy.Plugins do
   @wildthings_regex ~r{\/(?<thing>\w+)\?id=(?<id>\d+)}
 
   def track(%Conv{status: 404, path: path} = conv) do
-    Logger.warning("#{path} is on the loose")
+    if Mix.env() != :test do
+      IO.puts("Warning: #{path} is on the loose!")
+      Servy.FourOhFourCounter.bump_count(path)
+    end
+
     conv
   end
 
