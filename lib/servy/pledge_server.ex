@@ -29,9 +29,9 @@ defmodule Servy.GenericServer do
         new_state = module_name.handle_cast(message, state)
         listen_loop(new_state, module_name)
 
-      unexpected_message ->
-        IO.puts("Unexpected message : #{inspect(unexpected_message)}")
-        listen_loop(state, module_name)
+      other ->
+        new_state = module_name.handle_info(other, state)
+        listen_loop(new_state, module_name)
     end
   end
 end
@@ -68,6 +68,11 @@ defmodule Servy.PledgeServer do
     []
   end
 
+  def handle_info(unexpected_message, state) do
+    IO.puts("Unexpected message : #{inspect(unexpected_message)}")
+    state
+  end
+
   def handle_call({:create_pledge, name, amount}, state) do
     {:ok, pledge_id} = send_create_pledge(name, amount)
     most_recent_pledges = Enum.take(state, 2)
@@ -91,7 +96,9 @@ end
 
 alias Servy.PledgeServer
 
-PledgeServer.start()
+pid = PledgeServer.start()
+
+send(pid, {:stop, "hammertime"})
 
 IO.inspect(PledgeServer.create_pledge("larry", 10))
 IO.inspect(PledgeServer.create_pledge("moe", 20))
