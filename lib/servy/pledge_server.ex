@@ -44,8 +44,9 @@ defmodule Servy.PledgeServer do
     {:noreply, new_state}
   end
 
-  def handle_cast({:set_cache_size, size}, state) do
-    new_state = %{state | cache_size: size}
+  def handle_cast({:set_cache_size, size}, %State{pledges: pledges} = state) do
+    updated_pledges = Enum.take(pledges, size)
+    new_state = %{state | cache_size: size, pledges: updated_pledges}
     {:noreply, new_state}
   end
 
