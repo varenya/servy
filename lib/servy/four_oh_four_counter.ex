@@ -1,43 +1,43 @@
 defmodule Servy.FourOhFourCounter do
-  alias Servy.GenericServer
+  use GenServer
   @name :four_oh_four
   # Client
   def start(initial \\ %{}) do
-    GenericServer.start(__MODULE__, initial, @name)
+    GenServer.start(__MODULE__, initial, name: @name)
   end
 
   def reset_count() do
-    GenericServer.cast(@name, :reset_count)
+    GenServer.cast(@name, :reset_count)
   end
 
   def bump_count(url_path) do
-    GenericServer.call(@name, {:bump_count, url_path})
+    GenServer.call(@name, {:bump_count, url_path})
   end
 
   def get_count(url_path) do
-    GenericServer.call(@name, {:get_count, url_path})
+    GenServer.call(@name, {:get_count, url_path})
   end
 
   def get_counts() do
-    GenericServer.call(@name, :get_counts)
+    GenServer.call(@name, :get_counts)
   end
 
   def handle_cast(:reset_count, _state) do
-    %{}
+    {:noreply, %{}}
   end
 
-  def handle_call({:bump_count, url}, state) do
+  def handle_call({:bump_count, url}, _from, state) do
     current_count = Map.get(state, url, 0)
     new_state = state |> Map.put(url, current_count + 1)
-    {:ok, new_state}
+    {:reply, :ok, new_state}
   end
 
-  def handle_call(:get_counts, state) do
-    {state, state}
+  def handle_call(:get_counts, _from, state) do
+    {:reply, state, state}
   end
 
-  def handle_call({:get_count, url_path}, state) do
+  def handle_call({:get_count, url_path}, _from, state) do
     response = Map.get(state, url_path, 0)
-    {response, state}
+    {:reply, response, state}
   end
 end

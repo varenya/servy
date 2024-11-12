@@ -3,8 +3,9 @@ defmodule PledgeServerTest do
   alias Servy.PledgeServer
 
   setup_all %{} do
-    pid = PledgeServer.start()
+    {:ok, pid} = PledgeServer.start()
     on_exit(fn -> Process.exit(pid, :normal) end)
+    :ok
   end
 
   test "pledge server should hold only 3 recent pledges" do

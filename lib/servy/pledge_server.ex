@@ -2,7 +2,11 @@ defmodule Servy.PledgeServer do
   use GenServer
   @name :pledge_server
 
-  def start(initial_state \\ []) do
+  defmodule State do
+    defstruct cache_size: 3, pledges: []
+  end
+
+  def start(initial_state \\ %State{}) do
     IO.puts("Starting the pledge server......")
     GenServer.start(__MODULE__, initial_state, name: @name)
   end
@@ -23,31 +27,47 @@ defmodule Servy.PledgeServer do
     GenServer.cast(@name, :clear_pledges)
   end
 
+  def set_cache_size(size) do
+    GenServer.cast(@name, {:set_cache_size, size})
+  end
+
   # Server
 
-  def init(_state) do
-    initial_state = fetch_recent_pledges_from_service()
-    {:ok, initial_state}
+  def init(state) do
+    initial_pleges = fetch_recent_pledges_from_service()
+    new_state = %{state | pledges: initial_pleges}
+    {:ok, new_state}
   end
 
-  def handle_cast(:clear_pledges, _state) do
-    {:noreply, []}
+  def handle_cast(:clear_pledges, state) do
+    new_state = %{state | pledges: []}
+    {:noreply, new_state}
   end
 
-  def handle_call({:create_pledge, name, amount}, _from, state) do
+  def handle_cast({:set_cache_size, size}, state) do
+    new_state = %{state | cache_size: size}
+    {:noreply, new_state}
+  end
+
+  def handle_call(
+        {:create_pledge, name, amount},
+        _from,
+        %State{cache_size: cache, pledges: pledges} = state
+      ) do
     {:ok, pledge_id} = send_create_pledge(name, amount)
-    most_recent_pledges = Enum.take(state, 2)
-    new_state = [{name, amount} | most_recent_pledges]
+    most_recent_pledges = Enum.take(pledges, cache - 1)
+    updated_pledges = [{name, amount} | most_recent_pledges]
+    new_state = %{state | pledges: updated_pledges}
     {:reply, pledge_id, new_state}
   end
 
-  def handle_call(:total_pledge, _from, state) do
-    total = Enum.map(state, &elem(&1, 1)) |> Enum.sum()
+  def handle_call(:total_pledge, _from, %State{pledges: pledges} = state) do
+    total = Enum.map(pledges, &elem(&1, 1)) |> Enum.sum()
     {:reply, total, state}
   end
 
   def handle_call(:recent_pledge, _from, state) do
-    {:reply, state, state}
+    {:reply, state.pledges, state}
   end
 
   defp fetch_recent_pledges_from_service do
