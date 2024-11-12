@@ -6,10 +6,6 @@ defmodule Servy.FourOhFourCounter do
     GenericServer.start(__MODULE__, initial, @name)
   end
 
-  defp update_url_count(url_map, url) do
-    current_count = Map.get(url_map, url, 0)
-    url_map |> Map.put(url, current_count + 1)
-  end
 
   def bump_count(url_path) do
     GenericServer.call(@name, {:bump_count, url_path})
