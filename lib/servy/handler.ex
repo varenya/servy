@@ -46,14 +46,7 @@ defmodule Servy.Handler do
   end
 
   def route(%Conv{method: "GET", path: "/snapshots"} = conv) do
-    task = Task.async(Servy.Tracker, :get_location, ["bigfoot"])
-
-    snapshots =
-      ["cam-1", "cam-2", "cam-3"]
-      |> Enum.map(&Task.async(VideoCam, :get_snapshot, [&1]))
-      |> Enum.map(&Task.await/1)
-
-    bigfoot = Task.await(task)
+    %{snapshots: snapshots, location: bigfoot} = Servy.SensorServer.get_snapshots()
 
     %{conv | status: 200, resp_body: BearView.show_snapshots(snapshots, bigfoot)}
   end
