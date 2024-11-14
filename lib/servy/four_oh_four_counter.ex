@@ -2,8 +2,9 @@ defmodule Servy.FourOhFourCounter do
   use GenServer
   @name :four_oh_four
   # Client
-  def start(initial \\ %{}) do
-    GenServer.start(__MODULE__, initial, name: @name)
+  def start_link(_arg) do
+    IO.puts("Starting 404 server..")
+    GenServer.start_link(__MODULE__, %{}, name: @name)
   end
 
   def reset_count() do

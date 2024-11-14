@@ -3,7 +3,7 @@ defmodule PledgeServerTest do
   alias Servy.PledgeServer
 
   setup_all %{} do
-    {:ok, pid} = PledgeServer.start()
+    {:ok, pid} = PledgeServer.start_link([])
     on_exit(fn -> Process.exit(pid, :normal) end)
     :ok
   end

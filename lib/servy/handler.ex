@@ -7,6 +7,7 @@ defmodule Servy.Handler do
   alias Servy.BearController
   alias Servy.Conv
   alias Servy.VideoCam
+  alias Servy.SensorServer.State
 
   def handle(request) do
     request
@@ -46,7 +47,8 @@ defmodule Servy.Handler do
   end
 
   def route(%Conv{method: "GET", path: "/snapshots"} = conv) do
-    %{snapshots: snapshots, location: bigfoot} = Servy.SensorServer.get_snapshots()
+    %State{sensor_data: %{snapshots: snapshots, location: bigfoot}} =
+      Servy.SensorServer.get_snapshots()
 
     %{conv | status: 200, resp_body: BearView.show_snapshots(snapshots, bigfoot)}
   end

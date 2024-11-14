@@ -4,7 +4,7 @@ defmodule FourOhFourCounterTest do
   alias Servy.FourOhFourCounter, as: Counter
 
   setup do
-    {:ok, pid} = Counter.start()
+    {:ok, pid} = Counter.start_link([])
     on_exit(fn -> Process.exit(pid, :normal) end)
     :ok
   end

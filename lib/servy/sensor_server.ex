@@ -8,8 +8,9 @@ defmodule Servy.SensorServer do
     defstruct sensor_data: %{}, duration: :timer.minutes(60)
   end
 
-  def start_link(_arg) do
-    GenServer.start_link(__MODULE__, %State{}, name: @name)
+  def start_link(duration) do
+    IO.puts("Starting sensor server with druation #{duration} mins")
+    GenServer.start_link(__MODULE__, %State{duration: :timer.minutes(duration)}, name: @name)
   end
 
   def get_snapshots do
